@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
+  <title>Chatbot</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Roboto', sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+      background: linear-gradient( 90deg, #8db879 0%, #021135 100% );
+    }
+    nav {
+      background: linear-gradient(#629968 0%, rgb(0, 0, 48) 200%);
+            padding: 15px;
+            text-align: center;
+        }
+        nav img {
+            height: 40px;
+            width: auto;
+        }
+
+        nav a {
+            color: rgb(210, 196, 196);
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 18px;
+        }
+
+    .chatbox {
+      width: 350px;
+      height: 500px;
+      background: linear-gradient(50deg, #3041ad 0%, #86bd6d 100%);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      display: flex;
+      margin: 0 auto;
+      flex-direction: column;
+      border-radius: 8px;
+      margin-top: 50px;
+    }
+
+    .chatbox-header {
+      padding: 10px;
+      background-color: #1328b275;
+      color: #ffffff;
+      text-align: center;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+
+    .chatbox-content {
+      flex-grow: 1;
+      padding: 10px;
+      overflow-y: auto;
+    }
+
+    .chatbox-content li {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .chatbox-content li.chatbot {
+      
+      align-self: flex-start;
+    }
+
+    .chatbox-content li.user {
+      
+      align-self: flex-end;
+
+    }
+    .chatbot-reply {
+      text-align: right;  
+    }
+
+
+    .chatbox-content .chatbox-message {
+      padding: 6px 12px;
+      border-radius: 20px;
+      color: #170606;
+      max-width: 80%;
+      overflow-wrap: break-word;  
+    }
+
+    .chatbox-content .user.chatbox-message {
+      background-color: #96d0f5;
+    }
+
+    .chatbox-content .chatbot .chatbox-message {
+      background-color: #8c97e6;
+    }
+
+    .chatbox-input {
+      display: flex;
+      padding: 10px;
+    }
+
+    .input-box {
+      flex-grow: 1;
+      margin-right: 10px;
+      height: 2.5rem;
+    }
+
+    .send-button {
+            background: linear-gradient(to bottom, #aec8a3 0%, #3d65c9 100%);
+            color: rgb(255, 255, 255);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            height: 2.5rem;
+        }
+
+  </style>
+</head>
+
+<body>
+<header>
+  <nav>
+    <img src="your-logo.png" alt="Logo">
+    <a href="home"> Home </a>
+    <a href="chatbox"> RIC FAQ Chatbot</a>
+  </nav>
+</header>
+
+<div class="chatbox">
+  <div class="chatbox-header"> Chatbot</div>
+  <div id="chat-history" class="chatbox-content"></div>
+  <div class="chatbox-input">
+    <input id="userInput" type="text" class="input-box" id="userInput" placeholder="Type your message...">
+    <button id="sendButton" class="send-button">Send</button>
+  </div>
+</div>
+<script>
+  document.getElementById('sendButton').addEventListener('click', sendMessage);
+      document.getElementById('userInput').addEventListener('keypress', function (e) {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
+                function sendMessage() {
+      var userInput = document.getElementById("userInput").value.trim();
+      var userMessageElement = document.createElement("li");
+      userMessageElement.className = "user";
+      userMessageElement.innerHTML = `<div class="chatbox-message user">${userInput}</div>`;
+      document.getElementById("chat-history").appendChild(userMessageElement);
+
+      if (userInput !== '') {
+        // Clear input field
+        document.getElementById('userInput').value = '';
+
+        // Send AJAX request to Flask backend
+        fetch('/process', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+
+          body: JSON.stringify({ message: userInput })
+        })
+          .then(response => response.json())
+          .then(data => {
+        
+            var botResponse = data['message']['message'];
+            
+
+            var botMessageElement = document.createElement("li");
+            botMessageElement.className = "chatbot";
+            botMessageElement.innerHTML = `<div class="chatbox-message bot-message">${botResponse}</div>`;
+
+            document.getElementById("chat-history").appendChild(botMessageElement);
+          })
+          .catch(error => console.error('Error:', error));
+      }
+      else {
+                var botResponse = "Please enter some words or questions!!";
+              }
+    }
+</script>
+</body>
+</html>
